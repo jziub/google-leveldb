@@ -118,8 +118,19 @@ include(GNUInstallDirs)
 
 add_library(leveldb "")
 target_sources(leveldb
-  PRIVATE
+  PRIVATE  
     "${PROJECT_BINARY_DIR}/${LEVELDB_PORT_CONFIG_DIR}/port_config.h"
+    "newdb/new_db_impl.cc"
+    "newdb/new_db_impl.h"
+    "newdb/new_log_format.h"
+ 	"newdb/new_log_writer.h"
+ 	"newdb/new_log_writer.cc"
+ 	"newdb/new_log_reader.h"
+ 	"newdb/new_log_reader.cc"
+ 	"newdb/new_statusor.h"
+ 	"newdb/new_db_env.h" 	
+ 	"newdb/memtable/new_memtable.h"
+ 	"newdb/memtable/new_memtable.cc"
     "db/builder.cc"
     "db/builder.h"
     "db/c.cc"
@@ -221,6 +232,10 @@ else (WIN32)
       "util/env_posix.cc"
       "util/posix_logger.h"
   )
+  target_sources(leveldb
+    PRIVATE
+      "newdb/new_env_posix.cc"
+  )  
 endif (WIN32)
 
 # MemEnv is not part of the interface and could be pulled to a separate library.
@@ -345,6 +360,11 @@ if(LEVELDB_BUILD_TESTS)
   leveldb_test("util/no_destructor_test.cc")
 
   if(NOT BUILD_SHARED_LIBS)
+    leveldb_test("app/app_test.cc")
+    leveldb_test("newdb/new_db_impl_test.cc")
+ 	leveldb_test("newdb/new_env_posix_test.cc")
+ 	leveldb_test("newdb/new_log_rw_test.cc")
+  
     leveldb_test("db/autocompact_test.cc")
     leveldb_test("db/corruption_test.cc")
     leveldb_test("db/db_test.cc")

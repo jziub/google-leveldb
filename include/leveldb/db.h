@@ -53,6 +53,9 @@ class LEVELDB_EXPORT DB {
   static Status Open(const Options& options, const std::string& name,
                      DB** dbptr);
 
+  static Status NewOpen(const Options& options, const std::string& name,
+                     DB** dbptr);
+
   DB() = default;
 
   DB(const DB&) = delete;
