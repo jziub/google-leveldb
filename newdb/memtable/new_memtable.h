@@ -8,6 +8,8 @@
 #ifndef NEWDB_MEMTABLE_NEW_MEMTABLE_H_
 #define NEWDB_MEMTABLE_NEW_MEMTABLE_H_
 
+#include <list>
+
 #include "leveldb/db.h"
 #include "db/dbformat.h"
 
@@ -23,6 +25,25 @@ class NewMemTable {
 		virtual bool Get(const LookupKey& key, std::string* value, Status* s) = 0;
 
 		virtual ~NewMemTable() {};
+};
+
+class NaiveMemTable : public NewMemTable {
+	public:
+		NaiveMemTable(const InternalKeyComparator& comparator)
+			: comparator_(comparator) {}
+
+		void Add(SequenceNumber seq, ValueType type, const Slice& key,
+						 const Slice& value);
+		bool Get(const LookupKey& key, std::string* value, Status* s);
+
+	private:
+		struct KeyValuePair {
+			Slice internal_key;
+			Slice memtable_value;
+		};
+
+		std::list<KeyValuePair> data_;
+		InternalKeyComparator comparator_;
 };
 
 }  // namespace leveldb

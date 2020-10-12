@@ -364,6 +364,7 @@ if(LEVELDB_BUILD_TESTS)
     leveldb_test("newdb/new_db_impl_test.cc")
  	leveldb_test("newdb/new_env_posix_test.cc")
  	leveldb_test("newdb/new_log_rw_test.cc")
+ 	leveldb_test("newdb/memtable/new_memtable_test.cc")
   
     leveldb_test("db/autocompact_test.cc")
     leveldb_test("db/corruption_test.cc")
