@@ -360,7 +360,7 @@ if(LEVELDB_BUILD_TESTS)
   leveldb_test("util/no_destructor_test.cc")
 
   if(NOT BUILD_SHARED_LIBS)
-    leveldb_test("app/app_test.cc")
+	  #leveldb_test("app/app_test.cc")
     leveldb_test("newdb/new_db_impl_test.cc")
  	leveldb_test("newdb/new_env_posix_test.cc")
  	leveldb_test("newdb/new_log_rw_test.cc")

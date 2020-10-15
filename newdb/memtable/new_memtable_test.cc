@@ -103,6 +103,47 @@ TEST_F(NaiveMemTableTest, DeleteGetValue) {
 	}
 }
 
+TEST_F(NaiveMemTableTest, Iterator) {
+	std::map<std::string, std::string> kv = {
+			{"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {"k4", "v4"}, {"k5", "v5"},
+	};
+
+	for (const auto& [key, val] : kv) {
+		memtable_->Add(kSeqNum, ValueType::kTypeValue, Slice(key), Slice(val));
+	}
+
+	auto* iter = memtable_->NewIterator();
+
+	for (const auto& [key, val] : kv) {
+		ASSERT_TRUE(iter->Valid());
+		EXPECT_TRUE(Slice(key).compare(ExtractUserKey(iter->key())) == 0);
+		EXPECT_TRUE(Slice(val).compare(iter->value()) == 0);
+		iter->Next();
+	}
+	ASSERT_FALSE(iter->Valid());
+}
+
+TEST_F(NaiveMemTableTest, ReverseIterator) {
+	std::map<std::string, std::string> kv = {
+			{"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {"k4", "v4"}, {"k5", "v5"},
+	};
+
+	for (const auto& [key, val] : kv) {
+		memtable_->Add(kSeqNum, ValueType::kTypeValue, Slice(key), Slice(val));
+	}
+
+	auto* iter = memtable_->NewIterator();
+	iter->SeekToLast();
+	std::map<std::string, std::string>::reverse_iterator kv_iter;
+	for (kv_iter = kv.rbegin(); kv_iter != kv.rend(); kv_iter++) {
+		ASSERT_TRUE(iter->Valid());
+		EXPECT_TRUE(Slice(kv_iter->first).compare(ExtractUserKey(iter->key())) == 0);
+		EXPECT_TRUE(Slice(kv_iter->second).compare(iter->value()) == 0);
+		iter->Prev();
+	}
+	ASSERT_FALSE(iter->Valid());
+}
+
 }  // namespace
 
 }  // namespace leveldb

@@ -16,6 +16,8 @@
 
 namespace leveldb {
 
+
+
 class NewMemTable {
 
 	public:
@@ -24,8 +26,12 @@ class NewMemTable {
 
 		virtual bool Get(const LookupKey& key, std::string* value, Status* s) = 0;
 
+		virtual Iterator* NewIterator() = 0;
+
 		virtual ~NewMemTable() {};
 };
+
+
 
 class NaiveMemTable : public NewMemTable {
 	public:
@@ -35,15 +41,17 @@ class NaiveMemTable : public NewMemTable {
 		void Add(SequenceNumber seq, ValueType type, const Slice& key,
 						 const Slice& value);
 		bool Get(const LookupKey& key, std::string* value, Status* s);
+		Iterator* NewIterator();
 
 	private:
-		struct KeyValuePair {
-			Slice internal_key;
-			Slice memtable_value;
-		};
-
-		std::list<KeyValuePair> data_;
+//		struct KeyValuePair {
+//			Slice internal_key;
+//			Slice memtable_value;
+//		};
+		std::list<std::pair<Slice, Slice>> data_;  // [internal_key, memtable_value]
 		InternalKeyComparator comparator_;
+
+		friend class NaiveMemTableIterator;
 };
 
 }  // namespace leveldb
