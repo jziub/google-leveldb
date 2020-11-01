@@ -165,6 +165,9 @@ LEVELDB_EXPORT Status DestroyDB(const std::string& name,
 LEVELDB_EXPORT Status RepairDB(const std::string& dbname,
                                const Options& options);
 
+LEVELDB_EXPORT Status DestroyNewDB(const std::string& name,
+                                const Options& options);
+
 }  // namespace leveldb
 
 #endif  // STORAGE_LEVELDB_INCLUDE_DB_H_

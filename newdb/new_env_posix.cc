@@ -130,6 +130,9 @@ namespace {
 		  	if (read_size < 0) {
 		  		return PosixError(filename_, errno);
 		  	}
+		  	if (read_size == 0) {
+		  		return Status::NotFound(Slice());
+		  	}
 
 		  	*result = Slice(scratch, read_size);
 		  	return Status::OK();
@@ -379,9 +382,59 @@ Status NewDBEnv::GetTestDirectory(std::string* path) {
   return Status::OK();
 }
 
+bool NewDBEnv::FileExists(const std::string& filename) {
+	return ::access(filename.c_str(), F_OK) == 0;
+}
+
+Status NewDBEnv::GetChildren(const std::string& directory_path,
+									 std::vector<std::string>* result) {
+	result->clear();
+	::DIR* dir = ::opendir(directory_path.c_str());
+	if (dir == nullptr) {
+		return PosixError(directory_path, errno);
+	}
+	struct ::dirent* entry;
+	while ((entry = ::readdir(dir)) != nullptr) {
+		result->emplace_back(entry->d_name);
+	}
+	::closedir(dir);
+	return Status::OK();
+}
+
+Status NewDBEnv::RemoveFile(const std::string& filename) {
+	if (::unlink(filename.c_str()) != 0) {
+		return PosixError(filename, errno);
+	}
+	return Status::OK();
+}
+
+Status NewDBEnv::CreateDir(const std::string& dirname) {
+	if (::mkdir(dirname.c_str(), 0755) != 0) {
+		return PosixError(dirname, errno);
+	}
+	return Status::OK();
+}
+
 Status NewDBEnv::RemoveDir(const std::string& dirname) {
 	if (::rmdir(dirname.c_str()) != 0) {
 		return PosixError(dirname, errno);
+	}
+	return Status::OK();
+}
+
+Status NewDBEnv::GetFileSize(const std::string& filename, uint64_t* size) {
+	struct ::stat file_stat;
+	if (::stat(filename.c_str(), &file_stat) != 0) {
+		*size = 0;
+		return PosixError(filename, errno);
+	}
+	*size = file_stat.st_size;
+	return Status::OK();
+}
+
+Status NewDBEnv::RenameFile(const std::string& from, const std::string& to) {
+	if (std::rename(from.c_str(), to.c_str()) != 0) {
+		return PosixError(from, errno);
 	}
 	return Status::OK();
 }

@@ -16,8 +16,6 @@
 
 namespace leveldb {
 
-
-
 class NewMemTable {
 
 	public:
@@ -30,8 +28,6 @@ class NewMemTable {
 
 		virtual ~NewMemTable() {};
 };
-
-
 
 class NaiveMemTable : public NewMemTable {
 	public:

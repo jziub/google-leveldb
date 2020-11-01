@@ -17,7 +17,6 @@ NewWriter::NewWriter(WritableFile* dest): dest_(dest) {
 }
 
 Status NewWriter::AddRecord(const Slice& slice) {
-	const auto* ptr = slice.data();
 	size_t size = slice.size();
 
 	char header[kNewHeaderSize];

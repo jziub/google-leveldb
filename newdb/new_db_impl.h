@@ -8,12 +8,20 @@
 #ifndef NEWDB_NEW_DB_IMPL_H_
 #define NEWDB_NEW_DB_IMPL_H_
 
-#include <unordered_map>
+#include <memory>
 #include <string>
 
 #include "leveldb/db.h"
+#include "newdb/memtable/new_memtable.h"
+#include "newdb/new_db_env.h"
+#include "newdb/new_log_writer.h"
+#include "newdb/new_log_reader.h"
+#include "newdb/new_statusor.h"
+
 
 namespace leveldb {
+
+using namespace ::leveldb::log;
 
 class NewDBImpl : public DB {
   public:
@@ -43,9 +51,22 @@ class NewDBImpl : public DB {
     void CompactRange(const Slice* begin, const Slice* end) override;
 
   private:
-		std::unordered_map<std::string, Slice> db_data_;
+    friend class DB;
 
-//		std::unordered_map<int, int> data_;
+    std::string dbname_;
+
+		InternalKeyComparator* const internal_key_comparator_;
+    NewMemTable* mem_table_;
+
+    NewWriter* wal_writer_;
+    NewReader* wal_reader_;
+    StatusOr<WritableFile> wal_wrapper_;
+    NewDBEnv* const env_;
+
+    Status Recover(const std::string& dbname);
+    Status AppendWAL(SequenceNumber seq, ValueType type,
+    		const Slice& key, const Slice& value);
+    Status LoadWALToMemTable(const std::string& filename);
 };
 
 }  // namespace leveldb

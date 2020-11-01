@@ -1,5 +1,8 @@
-#include <newdb/new_db_impl.h>
+#include <unordered_map>
+
+#include "newdb/new_db_impl.h"
 #include "leveldb/db.h"
+#include "util/testutil.h"
 
 #include "gtest/gtest.h"
 
@@ -9,29 +12,56 @@ namespace {
 
 class NewDBImplTest : public testing::Test {
 	public:
-		NewDBImplTest() {
-			Options options;
-			DB::NewOpen(options, "/tmp/testdb", &db_);
+		NewDBImplTest() : options_(Options()) {}
+
+		~NewDBImplTest() {}
+
+	protected:
+		std::unordered_map<std::string, std::string> kDict = {
+				{"k1", "v1"}, {"k2", "v2"}, {"k3", "v3"}, {"k4", "v4"}, {"k5", "v5"},
+		};
+
+		Options options_;
+		DB* db_;
+
+		void SetUp() override {
+			ASSERT_LEVELDB_OK(DB::NewOpen(options_, "/tmp/testdb", &db_));
 		}
 
-		~NewDBImplTest() {
+		void TearDown() override {
+			DestroyNewDB("/tmp/testdb", options_);
 			delete db_;
 		}
 
-	protected:
-		DB* db_;
+		void Write() {
+			WriteOptions options;
+			for (const auto& [key, val] : kDict) {
+				ASSERT_LEVELDB_OK(db_->Put(options, key, val));
+			}
+		}
+
+		void Read() {
+			ReadOptions options;
+			std::string actual;
+			for (const auto& [key, val] : kDict) {
+				ASSERT_LEVELDB_OK(db_->Get(options, key, &actual));
+				EXPECT_EQ(actual, val);
+			}
+		}
 };
 
 TEST_F(NewDBImplTest, PutGet) {
-	Slice value = "ValueExample";
-	Status status;
-	status = db_->Put(WriteOptions(), "KeyNameExample", value);
-	ASSERT_TRUE(status.ok());
+	Write();
+	Read();
+}
 
-	std::string res;
-	status = db_->Get(ReadOptions(), "KeyNameExample", &res);
-	ASSERT_TRUE(status.ok());
-	EXPECT_EQ(res, "ValueExample");
+TEST_F(NewDBImplTest, ReadExisting) {
+	Write();
+
+	delete db_;
+	ASSERT_LEVELDB_OK(DB::NewOpen(options_, "/tmp/testdb", &db_));
+
+	Read();
 }
 
 }  // namespace

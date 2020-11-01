@@ -60,7 +60,7 @@ namespace {
 }
 
 
-
+// allocation has to be done in heap;add a Arena class to promote continuous allocation
 void NaiveMemTable::Add(SequenceNumber seq, ValueType type, const Slice& key,
 				 const Slice& value) {
 	std::pair<Slice, Slice> kv;

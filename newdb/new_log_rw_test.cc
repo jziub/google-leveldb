@@ -75,7 +75,8 @@ TEST_F(NewLogReadWriteTest, WriteRead) {
 	std::string data_scratch;
 	for (auto& record : records) {
 		EXPECT_TRUE(reader_->ReadRecord(&data, &data_scratch));
-		EXPECT_EQ(record, data_scratch);
+		EXPECT_EQ(data_scratch, record);
+		EXPECT_EQ(data, Slice(record));
 	}
 }
 

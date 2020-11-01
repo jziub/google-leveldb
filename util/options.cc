@@ -6,9 +6,10 @@
 
 #include "leveldb/comparator.h"
 #include "leveldb/env.h"
+#include "newdb/new_db_env.h"
 
 namespace leveldb {
 
-Options::Options() : comparator(BytewiseComparator()), env(Env::Default()) {}
+Options::Options() : comparator(BytewiseComparator()), env(Env::Default()), new_env(CreateNewDBEnv()) {}
 
 }  // namespace leveldb

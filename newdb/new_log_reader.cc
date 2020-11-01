@@ -33,8 +33,8 @@ bool NewReader::ReadRecord(Slice* record, std::string* scratch) {
 		char buffer_scratch[size];
 		s = file_->Read(size, &buffer, buffer_scratch);
 		if (s.ok()) {
-			*record = buffer;
 			scratch->assign(buffer.data(), buffer.size());
+			*record = *scratch;
 		}
 	}
 
